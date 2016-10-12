@@ -22,6 +22,7 @@ public class RankerNumviews extends Ranker {
   @Override
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
+    
     // @CS2580: fill in your code here.
     return all;
   }
