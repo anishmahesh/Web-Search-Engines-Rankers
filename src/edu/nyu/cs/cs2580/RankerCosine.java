@@ -23,8 +23,6 @@ public class RankerCosine extends Ranker {
 
   @Override
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
-    // Process the raw query into tokens.
-    query.processQuery();
     query.computeVsm();
 
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
