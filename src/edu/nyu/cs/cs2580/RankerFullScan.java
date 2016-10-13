@@ -38,7 +38,7 @@ class RankerFullScan extends Ranker {
 
   private ScoredDocument scoreDocument(Query query, int did) {
     // Process the raw query into tokens.
-    query.processQuery();
+    //query.processQuery();
 
     // Get the document tokens.
     Document doc = _indexer.getDoc(did);
