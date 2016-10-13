@@ -1,6 +1,7 @@
 package edu.nyu.cs.cs2580;
 
 import java.util.Vector;
+import java.util.Collections;
 
 import edu.nyu.cs.cs2580.QueryHandler.CgiArguments;
 import edu.nyu.cs.cs2580.SearchEngine.Options;
@@ -22,7 +23,31 @@ public class RankerQl extends Ranker {
   @Override
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
-    // @CS2580: fill in your code here.
-    return all;
+    for (int i = 0; i < _indexer.numDocs(); ++i) {
+      all.add(scoreDocument(query, i));
+    }
+    Collections.sort(all, Collections.reverseOrder());
+    Vector<ScoredDocument> results = new Vector<ScoredDocument>();
+    for (int i = 0; i < all.size() && i < numResults; ++i) {
+      results.add(all.get(i));
+    }
+    return results;
+  }
+
+  private ScoredDocument scoreDocument(Query query, int did) {
+
+    Document doc = _indexer.getDoc(did);
+
+    double queryLikelyhoodProbability = 1.0;
+    double totalTermsInDoc = ((IndexerFullScan)_indexer).totalTermsInDocument(did);
+    double totalTermsInCourpus = _indexer._totalTermFrequency;
+    double lambda = 0.5;
+
+    for (String queryToken : query._tokens) {
+      double termFrequency = _indexer.documentTermFrequency(queryToken,did);
+      double corpusTermFrequency = _indexer.corpusDocFrequencyByTerm(queryToken);
+      queryLikelyhoodProbability *= (1-lambda)*(termFrequency/totalTermsInDoc)+(lambda)*(corpusTermFrequency/totalTermsInCourpus);
+    }
+    return new ScoredDocument(query._query, doc, queryLikelyhoodProbability);
   }
 }

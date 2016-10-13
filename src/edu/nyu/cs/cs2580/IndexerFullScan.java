@@ -280,6 +280,16 @@ class IndexerFullScan extends Indexer implements Serializable {
             doc.getTermFrequency().get(_dictionary.get(term)) : 0;
   }
 
+  public int totalTermsInDocument(int did){
+    DocumentFull doc = (DocumentFull) getDoc(did);
+
+    int count = 0;
+    for (int termIdx : doc.getTermFrequency().values()) {
+      count += termIdx;
+    }
+    return count;
+  }
+
   ///// Utility
 
   public Vector<String> getTermVector(Vector<Integer> tokens) {
