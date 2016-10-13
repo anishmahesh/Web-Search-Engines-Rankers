@@ -73,6 +73,11 @@ class IndexerFullScan extends Indexer implements Serializable {
     } finally {
       reader.close();
     }
+
+    for (Document document : _documents) {
+      computeRepresentations((DocumentFull) document);
+    }
+
     System.out.println(
         "Indexed " + Integer.toString(_numDocs) + " docs with " +
         Long.toString(_totalTermFrequency) + " terms.");
@@ -85,6 +90,36 @@ class IndexerFullScan extends Indexer implements Serializable {
     writer.close();
   }
 
+  private void computeRepresentations(DocumentFull doc) {
+    HashMap<String, Double> termMap = new HashMap<>();
+
+    double sumOfSquares = 0.0;
+    for (int termIdx : doc.getTermFrequency().keySet()) {
+      String term = _terms.get(termIdx);
+      double tf = tf(term, doc._docid);
+      double idf = idf(term);
+      termMap.put(term, tf*idf);
+      sumOfSquares += Math.pow(tf*idf, 2);
+    }
+
+    double lengthOfVector = Math.sqrt(sumOfSquares);
+    for (String term : termMap.keySet()) {
+
+      termMap.put(term, termMap.get(term) / lengthOfVector);
+    }
+
+    doc.setVsmRepresentation(termMap);
+  }
+
+  private double tf (String term, int docId){
+    int termFreqInDocument= documentTermFrequency(term, docId);
+    return termFreqInDocument == 0 ? 0 : 1 + Math.log(termFreqInDocument);
+  }
+
+  private double idf (String term){
+    return Math.log((_numDocs/(corpusDocFrequencyByTerm(term))));
+  }
+
   /**
    * Process the raw content (i.e., one line in corpus.tsv) corresponding to a
    * document, and constructs the token vectors for both title and body.
@@ -93,12 +128,14 @@ class IndexerFullScan extends Indexer implements Serializable {
   private void processDocument(String content) {
     Scanner s = new Scanner(content).useDelimiter("\t");
 
+    Map<Integer, Integer> termFrequencyInDoc = new HashMap<Integer, Integer>();
+
     String title = s.next();
     Vector<Integer> titleTokens = new Vector<Integer>();
-    readTermVector(title, titleTokens);
+    readTermVector(title, titleTokens, termFrequencyInDoc);
 
     Vector<Integer> bodyTokens = new Vector<Integer>();
-    readTermVector(s.next(), bodyTokens);
+    readTermVector(s.next(), bodyTokens, termFrequencyInDoc);
 
     int numViews = Integer.parseInt(s.next());
     s.close();
@@ -108,15 +145,18 @@ class IndexerFullScan extends Indexer implements Serializable {
     doc.setNumViews(numViews);
     doc.setTitleTokens(titleTokens);
     doc.setBodyTokens(bodyTokens);
-    _documents.add(doc);
-    ++_numDocs;
 
     Set<Integer> uniqueTerms = new HashSet<Integer>();
-    updateStatistics(doc.getTitleTokens(), uniqueTerms);
-    updateStatistics(doc.getBodyTokens(), uniqueTerms);
+
+    updateStatistics(doc.getTitleTokens(), uniqueTerms, termFrequencyInDoc);
+    updateStatistics(doc.getBodyTokens(), uniqueTerms, termFrequencyInDoc);
     for (Integer idx : uniqueTerms) {
       _termDocFrequency.put(idx, _termDocFrequency.get(idx) + 1);
     }
+
+    doc.setTermFrequency(termFrequencyInDoc);
+    _documents.add(doc);
+    ++_numDocs;
   }
   
   /**
@@ -124,8 +164,9 @@ class IndexerFullScan extends Indexer implements Serializable {
    * representation, store the integers in {@code tokens}.
    * @param content
    * @param tokens
+   * @param termFrequencyInDoc
    */
-  private void readTermVector(String content, Vector<Integer> tokens) {
+  private void readTermVector(String content, Vector<Integer> tokens, Map<Integer, Integer> termFrequencyInDoc) {
     Scanner s = new Scanner(content);  // Uses white space by default.
     while (s.hasNext()) {
       String token = s.next();
@@ -138,6 +179,7 @@ class IndexerFullScan extends Indexer implements Serializable {
         _dictionary.put(token, idx);
         _termCorpusFrequency.put(idx, 0);
         _termDocFrequency.put(idx, 0);
+        termFrequencyInDoc.put(idx, 0);
       }
       tokens.add(idx);
     }
@@ -149,12 +191,21 @@ class IndexerFullScan extends Indexer implements Serializable {
    * bridge between different token vectors.
    * @param tokens
    * @param uniques
+   * @param termFrequencyInDoc
    */
-  private void updateStatistics(Vector<Integer> tokens, Set<Integer> uniques) {
+  private void updateStatistics(Vector<Integer> tokens, Set<Integer> uniques,
+                                Map<Integer, Integer> termFrequencyInDoc) {
     for (int idx : tokens) {
       uniques.add(idx);
       _termCorpusFrequency.put(idx, _termCorpusFrequency.get(idx) + 1);
       ++_totalTermFrequency;
+
+      if (termFrequencyInDoc.containsKey(idx)) {
+        termFrequencyInDoc.put(idx, termFrequencyInDoc.get(idx) + 1);
+      }
+      else {
+        termFrequencyInDoc.put(idx, 1);
+      }
     }
   }
 
@@ -222,8 +273,11 @@ class IndexerFullScan extends Indexer implements Serializable {
 
   @Override
   public int documentTermFrequency(String term, int docid) {
-    SearchEngine.Check(false, "Not implemented!");
-    return 0;
+    if (getDoc(docid) == null || !_dictionary.containsKey(term)) return 0;
+    DocumentFull doc = (DocumentFull) getDoc(docid);
+
+    return doc.getTermFrequency().containsKey(_dictionary.get(term)) ?
+            doc.getTermFrequency().get(_dictionary.get(term)) : 0;
   }
 
   ///// Utility
