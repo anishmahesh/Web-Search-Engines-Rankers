@@ -2,6 +2,7 @@ package edu.nyu.cs.cs2580;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import edu.nyu.cs.cs2580.QueryHandler.CgiArguments;
@@ -40,7 +41,7 @@ public class RankerCosine extends Ranker {
   private ScoredDocument scoreDocument(Query query, int did) {
 
     Document doc = _indexer.getDoc(did);
-    HashMap<String, Double> docVsm = ((DocumentFull) doc).getVsmRepresentation();
+    Map<String, Double> docVsm = ((DocumentFull) doc).getVsmRepresentation();
 
     double score = 0.0;
     for (String queryToken : query._tokens) {
