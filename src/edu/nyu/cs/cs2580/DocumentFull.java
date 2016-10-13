@@ -25,7 +25,7 @@ public class DocumentFull extends Document {
   private Map<Integer, Integer> _termFrequency =
       new HashMap<Integer, Integer>();
 
-  private HashMap<String, Double> _vsmRepresentation;
+  private Map<String, Double> _vsmRepresentation = new HashMap<>();
 
   public DocumentFull(int docid, IndexerFullScan indexer) {
     super(docid);
@@ -64,5 +64,6 @@ public class DocumentFull extends Document {
     _vsmRepresentation = vsm;
   }
 
-  public HashMap<String, Double> getVsmRepresentation() { return _vsmRepresentation; }
+  public Map<String, Double> getVsmRepresentation() { return _vsmRepresentation; }
+
 }
