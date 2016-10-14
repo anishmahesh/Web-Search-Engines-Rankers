@@ -29,6 +29,16 @@ class Evaluator {
     public boolean hasRelevanceForDoc(int docid) {
       return relevances.containsKey(docid);
     }
+
+    public int getTotalRelevantCount() {
+      int count = 0;
+      for (double score : relevances.values()) {
+        if (score == 1.0) {
+          count++;
+        }
+      }
+      return count;
+    }
     
     public double getRelevanceForDoc(int docid) {
       return relevances.get(docid);
@@ -93,13 +103,18 @@ class Evaluator {
           case -1:
             evaluateQueryInstructor(currentQuery, results, judgments);
             break;
-          case 0:
-          case 1:
-          case 2:
+          case 0: evaluateQueryAtMetric0(currentQuery, results, judgments);
+            break;
+          case 1: evaluateQueryAtMetric1(currentQuery, results, judgments);
+            break;
+          case 2: evaluateQueryAtMetric2(currentQuery, results, judgments);
+            break;
           case 3:
-          case 4:
+          case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
+            break;
           case 5:
-          case 6:
+          case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
+            break;
           default:
             // @CS2580: add your own metric evaluations above, using function
             // names like evaluateQueryMetric0.
@@ -114,7 +129,7 @@ class Evaluator {
     }
     reader.close();
     if (results.size() > 0) {
-      evaluateQueryInstructor(currentQuery, results, judgments);
+      evaluateQueryAtMetric6(currentQuery, results, judgments);
     }
   }
   
@@ -136,4 +151,140 @@ class Evaluator {
     }
     System.out.println(query + "\t" + Double.toString(R / N));
   }
+
+  public static void evaluateQueryAtMetric0(
+          String query, List<Integer> docids,
+          Map<String, DocumentRelevances> judgments) {
+
+    DocumentRelevances relevances = judgments.get(query);
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+      return;
+    }
+
+    List<Double> relevantDocCumulative = getRelevantDocCumulative(relevances, docids);
+
+    System.out.println(query + "\t" + Double.toString(getPrecisionAtIndex(1, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getPrecisionAtIndex(5, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getPrecisionAtIndex(10, relevantDocCumulative)));
+  }
+
+
+  public static void evaluateQueryAtMetric1(
+          String query, List<Integer> docids,
+          Map<String, DocumentRelevances> judgments) {
+    DocumentRelevances relevances = judgments.get(query);
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+      return;
+    }
+
+    List<Double> relevantDocCumulative = getRelevantDocCumulative(relevances, docids);
+
+    System.out.println(query + "\t" + Double.toString(getRecallAtIndex(1, relevances, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getRecallAtIndex(5, relevances, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getRecallAtIndex(10, relevances, relevantDocCumulative)));
+  }
+
+  public static void evaluateQueryAtMetric6(
+          String query, List<Integer> docids,
+          Map<String, DocumentRelevances> judgments) {
+    DocumentRelevances relevances = judgments.get(query);
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+      return;
+    }
+
+    List<Double> relevantDocCumulative = getRelevantDocCumulative(relevances, docids);
+
+    int i;
+    for (i = 0; i < relevantDocCumulative.size(); i++) {
+      if (relevantDocCumulative.get(i) == 1) {
+        break;
+      }
+    }
+
+    System.out.println(query + "\t" +  (1.0 / (i+1)));
+  }
+
+  public static void evaluateQueryAtMetric4(
+          String query, List<Integer> docids,
+          Map<String, DocumentRelevances> judgments) {
+    DocumentRelevances relevances = judgments.get(query);
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+      return;
+    }
+
+    List<Double> relevantDocCumulative = getRelevantDocCumulative(relevances, docids);
+
+    double precisionSum = 0;
+    double currentCount = 0;
+    for (int i = 0; i < relevantDocCumulative.size(); i++) {
+
+      if (relevantDocCumulative.get(i) > currentCount) {
+        precisionSum += getPrecisionAtIndex(i+1, relevantDocCumulative);
+        currentCount = relevantDocCumulative.get(i);
+      }
+
+    }
+
+    System.out.println(query + "\t" + precisionSum / relevantDocCumulative.get(relevantDocCumulative.size() - 1));
+  }
+
+  public static void evaluateQueryAtMetric2(
+          String query, List<Integer> docids,
+          Map<String, DocumentRelevances> judgments) {
+    DocumentRelevances relevances = judgments.get(query);
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+      return;
+    }
+
+    List<Double> relevantDocCumulative = getRelevantDocCumulative(relevances, docids);
+
+    double beta = 0.5;
+    System.out.println(query + "\t" + Double.toString(getFMeasureAtIndex(1, beta, relevances, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getFMeasureAtIndex(5, beta, relevances, relevantDocCumulative)));
+    System.out.println(query + "\t" + Double.toString(getFMeasureAtIndex(10, beta, relevances, relevantDocCumulative)));
+  }
+
+  public static double getFMeasureAtIndex(int index, double beta, DocumentRelevances relevances, List<Double> relevantDocCumulative) {
+
+    double precision = getPrecisionAtIndex(index, relevantDocCumulative);
+    double recall = getRecallAtIndex(index, relevances, relevantDocCumulative);
+
+    return (1 + Math.pow(beta, 2))*(precision*recall)/((Math.pow(beta, 2) * precision) + recall);
+  }
+
+
+  public static double getPrecisionAtIndex(int index, List<Double> relevantDocCumulative) {
+
+    return relevantDocCumulative.get(index-1) / index;
+
+  }
+
+  public static double getRecallAtIndex(int index, DocumentRelevances relevances, List<Double> relevantDocCumulative) {
+
+
+    int totalRelevantCount = relevances.getTotalRelevantCount();
+
+    return relevantDocCumulative.get(index-1) / totalRelevantCount;
+  }
+
+  public static List<Double> getRelevantDocCumulative(DocumentRelevances relevances, List<Integer> docids) {
+
+    List<Double> cumulativeCount = new ArrayList<>();
+    double count = 0;
+    for (int i = 0; i < docids.size(); i++) {
+      int docid = docids.get(i);
+      if (relevances.hasRelevanceForDoc(docid) && relevances.getRelevanceForDoc(docid) == 1.0) {
+        count++;
+      }
+      cumulativeCount.add(count);
+    }
+    return cumulativeCount;
+  }
+
+
 }
