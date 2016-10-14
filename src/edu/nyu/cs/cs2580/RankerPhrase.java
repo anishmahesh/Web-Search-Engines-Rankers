@@ -47,15 +47,15 @@ public class RankerPhrase extends Ranker {
 	int secondTermCount = 0;
 	
 	if (query._tokens.size() == 1) {
-		score = ((IndexerFullScan)_indexer).documentTermFrequency(query._tokens.get(0),did);
+		score = _indexer.documentTermFrequency(query._tokens.get(0),did);
 	} else {
 		for (int i = 1; i < query._tokens.size(); i++) 
 		{
-			firstTermCount = ((IndexerFullScan)_indexer).documentTermFrequency(query._tokens.get(i), did);
+			firstTermCount = _indexer.documentTermFrequency(query._tokens.get(i), did);
 			if(firstTermCount > 0)
 			{
 				String bigramQuery = query._tokens.get(i - 1) + query._tokens.get(i);	
-				secondTermCount = ((IndexerFullScan)_indexer).documentTermFrequency(query._tokens.get(i-1),did);
+				secondTermCount = _indexer.documentTermFrequency(query._tokens.get(i-1),did);
 				if(secondTermCount > 0){
 					for (int j = 1; j < docTokens.size(); j++) 
 					{
