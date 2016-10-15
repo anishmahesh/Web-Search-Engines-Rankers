@@ -117,7 +117,7 @@ class IndexerFullScan extends Indexer implements Serializable {
   }
 
   private double idf (String term){
-    return Math.log((_numDocs/(corpusDocFrequencyByTerm(term))));
+    return Math.log(((double)_numDocs/(corpusDocFrequencyByTerm(term))));
   }
 
   /**
