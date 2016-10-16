@@ -153,7 +153,29 @@ class Evaluator {
     }
     reader.close();
     if (results.size() > 0) {
-      evaluateQueryAtMetric3(currentQuery, results, judgments);
+      switch (metric) {
+        case -1:
+          evaluateQueryInstructor(currentQuery, results, judgments);
+          break;
+        case 0: evaluateQueryAtMetric0(currentQuery, results, judgments);
+          break;
+        case 1: evaluateQueryAtMetric1(currentQuery, results, judgments);
+          break;
+        case 2: evaluateQueryAtMetric2(currentQuery, results, judgments);
+          break;
+        case 3: evaluateQueryAtMetric3(currentQuery, results, judgments);
+          break;
+        case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
+          break;
+        case 5: evaluateQueryAtMetric6(currentQuery, results, judgments);
+          break;
+        case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
+          break;
+        default:
+          // @CS2580: add your own metric evaluations above, using function
+          // names like evaluateQueryMetric0.
+          System.err.println("Requested metric not implemented!");
+      }
     }
   }
 
@@ -241,12 +263,17 @@ class Evaluator {
     List<Double> relevantDocCumulative = getTotalRelevantDocCumulative(relevances, docids);
     List<Double> allRecall = getAllRecall (relevances, relevantDocCumulative);
     List<Double> allMaxPrecision = getAllMaxPrecision (relevances, relevantDocCumulative);
-    Double[] Precisions = getPrecisionForRecallRange(allRecall, allMaxPrecision);
-
-    double count = 0.0;
-    for(int i=0; i<=10;i++){
-      count = i * 1.0;
-      System.out.println(query + "\t" + Precisions[i] + " at " + count/10);
+    try {
+      Double[] Precisions = getPrecisionForRecallRange(allRecall, allMaxPrecision);
+      double count = 0.0;
+      for(int i=0; i<=10;i++){
+        count = i * 1.0;
+        System.out.println(query + "\t" + Precisions[i] + " at " + count/10);
+      }
+    } catch (IndexOutOfBoundsException e) {
+      System.err.println("IndexOutOfBoundsException: " + e.getMessage());
+      System.err.println("Not all relevant cases included, please add more docs to result. To do this, in your query add greater count for :&num=<count>.");
+      System.err.println("Query Format :\n http://<host>:<port>/search?query=<query>&ranker=<ranker>&format=<format>&num=<count>");
     }
   }
 
@@ -279,59 +306,60 @@ class Evaluator {
     for(int i=0; i<11;i++){
       Precision[i] = -1.0;
     }
-    for(int i=0; i<allRecall.size();i++){
-      if(allRecall.get(i) == 1.0){
-        Precision[10] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.9){
-        Precision[9] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.8){
-        Precision[8] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.7){
-        Precision[7] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.6){
-        Precision[6] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.5){
-        Precision[5] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.4){
-        Precision[4] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.3){
-        Precision[3] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.2){
-        Precision[2] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.1){
-        Precision[1] = allPrecision.get(i);
-      } else if(allRecall.get(i) == 0.0){
-        Precision[0] = allPrecision.get(i);
-      } else if(allRecall.get(i) < 9 && allRecall.get(i) > 8 && Precision[9]==-1){
-        Precision[9] = previousPrecision;
-      } else if(allRecall.get(i) < 8 && allRecall.get(i) > 7 && Precision[8]==-1){
-        Precision[8] = previousPrecision;
-      } else if(allRecall.get(i) < 7 && allRecall.get(i) > 6 && Precision[7]==-1){
-        Precision[7] = previousPrecision;
-      } else if(allRecall.get(i) < 6 && allRecall.get(i) > 5 && Precision[6]==-1){
-        Precision[6] = previousPrecision;
-      } else if(allRecall.get(i) < 5 && allRecall.get(i) > 4 && Precision[5]==-1){
-        Precision[6] = previousPrecision;
-      } else if(allRecall.get(i) < 4 && allRecall.get(i) > 3 && Precision[4]==-1){
-        Precision[4] = previousPrecision;
-      } else if(allRecall.get(i) < 3 && allRecall.get(i) > 2 && Precision[3]==-1){
-        Precision[3] = previousPrecision;
-      } else if(allRecall.get(i) < 2 && allRecall.get(i) > 1 && Precision[2]==-1){
-        Precision[2] = previousPrecision;
-      } else if(allRecall.get(i) < 1 && allRecall.get(i) > 0 && Precision[1]==-1){
-        Precision[1] = previousPrecision;
+    for (int i = 0; i < allRecall.size(); i++) {
+        if (allRecall.get(i) == 1.0) {
+          Precision[10] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.9) {
+          Precision[9] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.8) {
+          Precision[8] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.7) {
+          Precision[7] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.6) {
+          Precision[6] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.5) {
+          Precision[5] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.4) {
+          Precision[4] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.3) {
+          Precision[3] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.2) {
+          Precision[2] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.1) {
+          Precision[1] = allPrecision.get(i);
+        } else if (allRecall.get(i) == 0.0) {
+          Precision[0] = allPrecision.get(i);
+        } else if (allRecall.get(i) < 0.9 && allRecall.get(i) > 0.8 && Precision[9] == -1) {
+          Precision[9] = previousPrecision;
+        } else if (allRecall.get(i) < 0.8 && allRecall.get(i) > 0.7 && Precision[8] == -1) {
+          Precision[8] = previousPrecision;
+        } else if (allRecall.get(i) < 0.7 && allRecall.get(i) > 0.6 && Precision[7] == -1) {
+          Precision[7] = previousPrecision;
+        } else if (allRecall.get(i) < 0.6 && allRecall.get(i) > 0.5 && Precision[6] == -1) {
+          Precision[6] = previousPrecision;
+        } else if (allRecall.get(i) < 0.5 && allRecall.get(i) > 0.4 && Precision[5] == -1) {
+          Precision[6] = previousPrecision;
+        } else if (allRecall.get(i) < 0.4 && allRecall.get(i) > 0.3 && Precision[4] == -1) {
+          Precision[4] = previousPrecision;
+        } else if (allRecall.get(i) < 0.3 && allRecall.get(i) > 0.2 && Precision[3] == -1) {
+          Precision[3] = previousPrecision;
+        } else if (allRecall.get(i) < 0.2 && allRecall.get(i) > 0.1 && Precision[2] == -1) {
+          Precision[2] = previousPrecision;
+        } else if (allRecall.get(i) < 0.1 && allRecall.get(i) > 0.0 && Precision[1] == -1) {
+          Precision[1] = previousPrecision;
+        }
+        previousPrecision = allPrecision.get(i);
       }
-      previousPrecision = allPrecision.get(i);
-    }
-    if(Precision[0] == -1){
-      Precision[0] = previousPrecision;
-    }
-    for(int i=10; i>=0;i--){
-      if(Precision[i] == -1.0){
-        Precision[i] = Precision[i+1];
+      if (Precision[0] == -1) {
+        Precision[0] = previousPrecision;
       }
-    }
-    return Precision;
+      for (int i = 10; i >= 0; i--) {
+        if (Precision[i] == -1.0) {
+          Precision[i] = Precision[i + 1];
+        }
+      }
+      return Precision;
+
   }
 
   public static void evaluateQueryAtMetric4(
