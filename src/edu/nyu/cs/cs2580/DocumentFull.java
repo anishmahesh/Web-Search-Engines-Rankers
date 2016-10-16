@@ -16,6 +16,7 @@ public class DocumentFull extends Document {
   private static final long serialVersionUID = -4093365505663362577L;
 
   private IndexerFullScan _indexer = null;
+  public String _startingText;
 
   private Vector<Integer> _titleTokens = new Vector<Integer>();
   private Vector<Integer> _bodyTokens = new Vector<Integer>();
