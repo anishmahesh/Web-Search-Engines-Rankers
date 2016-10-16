@@ -153,7 +153,7 @@ class Evaluator {
     }
     reader.close();
     if (results.size() > 0) {
-      evaluateQueryAtMetric3(currentQuery, results, judgments);
+      evaluateQueryAtMetric5(currentQuery, results, judgments);
     }
   }
 
