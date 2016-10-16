@@ -43,4 +43,9 @@ html {
     overflow: hidden;
 }
 
-
+.error-section {
+    height: 350px;
+    padding-top: 50px;
+    text-align: center;
+    background: #fff;
+}

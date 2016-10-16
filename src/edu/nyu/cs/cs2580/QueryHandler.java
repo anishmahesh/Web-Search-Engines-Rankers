@@ -153,6 +153,18 @@ class QueryHandler implements HttpHandler {
     // Process the CGI arguments.
     CgiArguments cgiArgs = new CgiArguments(uriQuery);
     if (cgiArgs._query.isEmpty()) {
+      if(cgiArgs._outputFormat.equals(CgiArguments.OutputFormat.HTML)){
+        HTMLOutputFromater htmlOutput = new HTMLOutputFromater();
+        StringBuffer response = new StringBuffer();
+        response.append(htmlOutput.getHeader());
+        response.append("<section id=\"intro\" class=\"error-section\">\n" +
+                "        <div class=\"row\">\n" +
+                "            <img src=\"static/images/sherlock.png\" height=200 wdith=330>\n" +
+                "        </div>\n" +
+                "    </section>");
+        response.append(htmlOutput.getFooter());
+        respondWithMsg(exchange, response.toString());
+      }
       respondWithMsg(exchange, "No query is given!");
     }
 
