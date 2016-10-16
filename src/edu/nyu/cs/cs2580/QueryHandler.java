@@ -61,7 +61,7 @@ class QueryHandler implements HttpHandler {
         String key = keyval[0].toLowerCase();
         String val = keyval[1];
         if (key.equals("query")) {
-          _query = val;
+          _query = val.replace("+", " ");
         } else if (key.equals("num")) {
           try {
             _numResults = Integer.parseInt(val);
