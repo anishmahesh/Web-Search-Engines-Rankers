@@ -39,6 +39,22 @@ $( document ).ready(function() {
                     
         };
                   
+                    initRankerParams();
+                    
+                    function initRankerParams() {
+                        var ranker =  getUrlParameter("ranker");
+                        if(ranker=="cosine"){
+                            $("#cosine").addClass("add-bold");
+                        }else if(ranker=="ql"){
+                            $("#ql").addClass("add-bold");
+                        }else if(ranker=="linear"){
+                            $("#linear").addClass("add-bold");
+                        }else if(ranker=="numviews"){
+                            $("#numview").addClass("add-bold");
+                        }else if(ranker=="phrase"){
+                            $("#phrase").addClass("add-bold");
+                        }
+                    }
         $("#searchBar").val(decodeURI(getUrlParameter("query")).replace(/\+/g, ' '));
         $("#ranker").val(getUrlParameter("ranker"));
         $("#num").val(getUrlParameter("num"));

@@ -158,3 +158,8 @@
 input.middle:focus {
     outline-width: 0;
 }
+
+.add-bold{
+    font-weight:400;
+    color: #2f3130 !important
+}
