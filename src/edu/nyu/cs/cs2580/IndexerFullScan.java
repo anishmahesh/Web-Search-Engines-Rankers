@@ -104,7 +104,6 @@ class IndexerFullScan extends Indexer implements Serializable {
 
     double lengthOfVector = Math.sqrt(sumOfSquares);
     for (String term : termMap.keySet()) {
-
       termMap.put(term, termMap.get(term) / lengthOfVector);
     }
 
@@ -132,7 +131,6 @@ class IndexerFullScan extends Indexer implements Serializable {
 
     String title = s.next();
     Vector<Integer> titleTokens = new Vector<Integer>();
-    readTermVector(title, titleTokens, termFrequencyInDoc);
 
     Vector<Integer> bodyTokens = new Vector<Integer>();
     readTermVector(s.next(), bodyTokens, termFrequencyInDoc);
@@ -145,7 +143,7 @@ class IndexerFullScan extends Indexer implements Serializable {
     doc.setNumViews(numViews);
     doc.setTitleTokens(titleTokens);
     doc.setBodyTokens(bodyTokens);
-
+    doc._startingText =  content.substring(0,80)+" ...";
     Set<Integer> uniqueTerms = new HashSet<Integer>();
 
     updateStatistics(doc.getTitleTokens(), uniqueTerms, termFrequencyInDoc);

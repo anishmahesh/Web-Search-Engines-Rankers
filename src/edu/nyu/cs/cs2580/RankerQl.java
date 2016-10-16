@@ -33,7 +33,9 @@ public class RankerQl extends Ranker {
     }
     return results;
   }
-
+  /*
+      Scores Document based on Query Likelyhood probability
+   */
   private ScoredDocument scoreDocument(Query query, int did) {
 
     Document doc = _indexer.getDoc(did);
