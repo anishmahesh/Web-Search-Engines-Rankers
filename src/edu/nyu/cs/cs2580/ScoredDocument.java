@@ -30,7 +30,8 @@ class ScoredDocument implements Comparable<ScoredDocument> {
    * @CS2580: Student should implement {@code asHtmlResult} for final project.
    */
   public String asHtmlResult() {
-    return "";
+    HTMLOutputFromater htmlOutput = new HTMLOutputFromater();
+    return  htmlOutput.getSearchResultRow(_doc.getTitle(),((DocumentFull)_doc)._startingText,_doc.getNumViews(),_score,_doc._docid);
   }
 
   @Override

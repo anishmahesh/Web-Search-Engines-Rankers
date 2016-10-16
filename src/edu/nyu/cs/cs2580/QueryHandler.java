@@ -97,7 +97,7 @@ class QueryHandler implements HttpHandler {
   private void respondWithMsg(HttpExchange exchange, final String message)
       throws IOException {
     Headers responseHeaders = exchange.getResponseHeaders();
-    responseHeaders.set("Content-Type", "text/plain");
+    responseHeaders.set("Content-Type", "text/html");
     exchange.sendResponseHeaders(200, 0); // arbitrary number of bytes
     OutputStream responseBody = exchange.getResponseBody();
     responseBody.write(message.getBytes());
@@ -110,6 +110,18 @@ class QueryHandler implements HttpHandler {
       response.append(response.length() > 0 ? "\n" : "");
       response.append(doc.asTextResult());
     }
+    response.append(response.length() > 0 ? "\n" : "No result returned!");
+  }
+
+  private void constructHTMLOutput(
+          final Vector<ScoredDocument> docs, StringBuffer response) {
+    HTMLOutputFromater htmlOutput = new HTMLOutputFromater();
+    response.append(htmlOutput.getHeader());
+    for (ScoredDocument doc : docs) {
+      response.append(response.length() > 0 ? "\n" : "");
+      response.append(doc.asHtmlResult());
+    }
+    response.append(htmlOutput.getFooter());
     response.append(response.length() > 0 ? "\n" : "No result returned!");
   }
 
@@ -165,7 +177,7 @@ class QueryHandler implements HttpHandler {
       constructTextOutput(scoredDocs, response);
       break;
     case HTML:
-      // @CS2580: Plug in your HTML output
+      constructHTMLOutput(scoredDocs, response);
       break;
     default:
       // nothing

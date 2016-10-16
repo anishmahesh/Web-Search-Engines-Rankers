@@ -168,6 +168,7 @@ public class SearchEngine {
     // Establish the serving environment
     InetSocketAddress addr = new InetSocketAddress(SearchEngine.PORT);
     HttpServer server = HttpServer.create(addr, -1);
+    server.createContext("/static", new StaticFileServer());
     server.createContext("/", handler);
     server.setExecutor(Executors.newCachedThreadPool());
     server.start();
