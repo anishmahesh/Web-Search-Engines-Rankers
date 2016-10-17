@@ -269,7 +269,7 @@ class Evaluator {
     try {
       Double[] Precisions = getPrecisionForRecallRange(allRecall, allMaxPrecision);
       for(int i=0; i<=10;i++){
-        System.out.println(query + "\t" + Precisions[i] + " at " + (double)i/10);
+        System.out.println(query + "\t" + Precisions[i]);
       }
     } catch (IndexOutOfBoundsException e) {
       System.err.println("IndexOutOfBoundsException: " + e.getMessage());

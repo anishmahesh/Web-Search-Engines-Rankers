@@ -95,7 +95,7 @@ public class RankerLinear extends Ranker {
     }
 
     private double normalize (double score,double max,double min){
-        return ((score-min)/(max-min));
+        return (max>min)?((score - min) / (max - min)):0.0;
     }
 
     public ScoredDocument scoreDocument(Query query, int did){
