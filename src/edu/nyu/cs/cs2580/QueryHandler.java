@@ -51,7 +51,7 @@ class QueryHandler implements HttpHandler {
     }
     public OutputFormat _outputFormat = OutputFormat.TEXT;
 
-    public CgiArguments(String uriQuery) {
+    public CgiArguments(String uriQuery, Indexer indexer) {
       String[] params = uriQuery.split("&");
       for (String param : params) {
         String[] keyval = param.split("=", 2);
@@ -64,7 +64,12 @@ class QueryHandler implements HttpHandler {
           _query = val.replace("+", " ");
         } else if (key.equals("num")) {
           try {
-            _numResults = Integer.parseInt(val);
+            if (val.toLowerCase().equals("all")) {
+              _numResults = indexer.numDocs();
+            }
+            else {
+              _numResults = Integer.parseInt(val);
+            }
           } catch (NumberFormatException e) {
             // Ignored, search engine should never fail upon invalid user input.
           }
@@ -151,7 +156,7 @@ class QueryHandler implements HttpHandler {
     System.out.println("Query: " + uriQuery);
 
     // Process the CGI arguments.
-    CgiArguments cgiArgs = new CgiArguments(uriQuery);
+    CgiArguments cgiArgs = new CgiArguments(uriQuery, _indexer);
     if (cgiArgs._query.isEmpty()) {
       if(cgiArgs._outputFormat.equals(CgiArguments.OutputFormat.HTML)){
         HTMLOutputFromater htmlOutput = new HTMLOutputFromater();
