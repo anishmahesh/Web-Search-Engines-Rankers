@@ -22,8 +22,8 @@ mkdir -p TestOutputs
 rm -r TestOutputs/* &> /dev/null
 
 
-
 echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Test Case Runner${NC}\n\n"
+
 
 
 echo "\nCompiling Java Code\n"
@@ -32,12 +32,11 @@ echo "\nCompiling Java Code\n"
 } &> /dev/null
 STATUS=$?
 if [ $STATUS -eq 0 ]; then
-echo "\n\n${green}Java Build Successful${NC}\n\n"
+    echo "\n\n${green}Java Build Successful${NC}\n\n"
 else
-echo "\n\n${red}Java Build Failed${NC}\n\n"
-exit 0
+    echo "\n\n${red}Java Build Failed${NC}\n\n"
+    exit 0
 fi
-
 
 
 
@@ -48,12 +47,11 @@ echo "\nCreating search Index"
 STATUS=$?
 STATUS=$?
 if [ $STATUS -eq 0 ]; then
-echo "\n\n${green}Search Index Created${NC}\n\n"
+    echo "\n\n${green}Search Index Created${NC}\n\n"
 else
-echo "\n\n${red}Index Creation Failed${NC}\n\n"
-exit 0
+    echo "\n\n${red}Index Creation Failed${NC}\n\n"
+    exit 0
 fi
-
 
 
 
@@ -65,11 +63,13 @@ echo "\nStarting Java Search Engine Server\n"
     sleep 20
 } &> /dev/null
 if [ $STATUS -eq 0 ]; then
-echo "\n\n${green}Server Started${NC}\n\n"
+    JavaServerPID=$!
+    echo "\n\n${green}Server Started${NC}\n\n"
 else
-echo "\n\n${red}Initialising Server Encountered an error${NC}\n\n"
+    echo "\n\n${red}Initialising Server Encountered an error${NC}\n\n"
 exit 0
 fi
+
 
 
 
@@ -95,7 +95,7 @@ evaluate () {
     do
         if [[ ! -z $r ]]
         then
-            #100 Results for Precision at Recall Points
+            #1000 Results for Precision at Recall Points
             if [[ $i == 3 ]]
             then
                 n=1000
@@ -157,6 +157,25 @@ do
         evaluate "$query" "phrase"
     } >> TestOutputs/hw1.3-phrase.tsv  2>&0
 done < "$filename"
+
+
+
+
+echo "\n\nShuting down Java Server\n"
+{
+    kill $JavaServerPID
+} &> /dev/null
+STATUS=$?
+if [ $STATUS -eq 0 ]; then
+    echo "\n\n${green}Server Stopped${NC}\n\n"
+else
+    echo "\n\n${red}Error in shutting down the server${NC}\n\n"
+    exit 0
+fi
+
+
+
+echo "\nTest case execution ${green}completed!${NC} Output files in ${bold}./TestOutputs${NC}\n"
 
 
 
