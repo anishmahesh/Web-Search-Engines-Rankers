@@ -108,7 +108,7 @@ test () {
                 #1000 Results for Precision at Recall Points
                 if [[ $i == 3 ]]
                 then
-                    n=1000
+                    n="all"
                 fi
                 curl "http://localhost:25808/search?query=$q&ranker=$r&format=text&num=$n" | java -cp src edu.nyu.cs.cs2580.Evaluator data/labels.tsv $i | awk -F "\t" '{print $2}' | tr '\n' '\t'
                 n=10
