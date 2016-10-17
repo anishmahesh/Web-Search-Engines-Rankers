@@ -26,6 +26,7 @@ public class DocumentFull extends Document {
   private Map<Integer, Integer> _termFrequency =
       new HashMap<Integer, Integer>();
 
+//  Normalized tf-idf value for each term in the document
   private Map<String, Double> _vsmRepresentation = new HashMap<>();
 
   public DocumentFull(int docid, IndexerFullScan indexer) {

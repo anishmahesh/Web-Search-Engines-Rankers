@@ -90,6 +90,7 @@ class IndexerFullScan extends Indexer implements Serializable {
     writer.close();
   }
 
+//  Given a document, compute the TF-IDF normalization for its term frequency map
   private void computeRepresentations(DocumentFull doc) {
     HashMap<String, Double> termMap = new HashMap<>();
 
@@ -110,11 +111,13 @@ class IndexerFullScan extends Indexer implements Serializable {
     doc.setVsmRepresentation(termMap);
   }
 
+//  Returns the Term Frequency for a given term and document
   private double tf (String term, int docId){
     int termFreqInDocument= documentTermFrequency(term, docId);
     return termFreqInDocument == 0 ? 0 : 1 + Math.log(termFreqInDocument);
   }
 
+//  Returns the Inverse Document Frequency for a given term
   private double idf (String term){
     return Math.log(((double)_numDocs/(corpusDocFrequencyByTerm(term))));
   }
