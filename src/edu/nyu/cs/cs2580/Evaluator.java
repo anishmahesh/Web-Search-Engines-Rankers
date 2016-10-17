@@ -121,29 +121,7 @@ class Evaluator {
       final String query = s.next();
       if (!query.equals(currentQuery)) {
         if (results.size() > 0) {
-          switch (metric) {
-          case -1:
-            evaluateQueryInstructor(currentQuery, results, judgments);
-            break;
-          case 0: evaluateQueryAtMetric0(currentQuery, results, judgments);
-            break;
-          case 1: evaluateQueryAtMetric1(currentQuery, results, judgments);
-            break;
-          case 2: evaluateQueryAtMetric2(currentQuery, results, judgments);
-            break;
-          case 3: evaluateQueryAtMetric3(currentQuery, results, judgments);
-            break;
-          case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
-            break;
-          case 5: evaluateQueryAtMetric5(currentQuery, results, judgments);
-            break;
-          case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
-            break;
-          default:
-            // @CS2580: add your own metric evaluations above, using function
-            // names like evaluateQueryMetric0.
-            System.err.println("Requested metric not implemented!");
-          }
+          evaluateQuery(metric, judgments, results, currentQuery);
           results.clear();
         }
         currentQuery = query;
@@ -153,29 +131,34 @@ class Evaluator {
     }
     reader.close();
     if (results.size() > 0) {
-      switch (metric) {
-        case -1:
-          evaluateQueryInstructor(currentQuery, results, judgments);
-          break;
-        case 0: evaluateQueryAtMetric0(currentQuery, results, judgments);
-          break;
-        case 1: evaluateQueryAtMetric1(currentQuery, results, judgments);
-          break;
-        case 2: evaluateQueryAtMetric2(currentQuery, results, judgments);
-          break;
-        case 3: evaluateQueryAtMetric3(currentQuery, results, judgments);
-          break;
-        case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
-          break;
-        case 5: evaluateQueryAtMetric5(currentQuery, results, judgments);
-          break;
-        case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
-          break;
-        default:
-          // @CS2580: add your own metric evaluations above, using function
-          // names like evaluateQueryMetric0.
-          System.err.println("Requested metric not implemented!");
-      }
+      evaluateQuery(metric, judgments, results, currentQuery);
+    }
+  }
+
+  private static void evaluateQuery(int metric, Map<String, DocumentRelevances> judgments,
+                                    List<Integer> results, String currentQuery) {
+    switch (metric) {
+    case -1:
+      evaluateQueryInstructor(currentQuery, results, judgments);
+      break;
+    case 0: evaluateQueryMetric0(currentQuery, results, judgments);
+      break;
+    case 1: evaluateQueryMetric1(currentQuery, results, judgments);
+      break;
+    case 2: evaluateQueryMetric2(currentQuery, results, judgments);
+      break;
+    case 3: evaluateQueryMetric3(currentQuery, results, judgments);
+      break;
+    case 4: evaluateQueryMetric4(currentQuery, results, judgments);
+      break;
+    case 5: evaluateQueryMetric5(currentQuery, results, judgments);
+      break;
+    case 6: evaluateQueryMetric6(currentQuery, results, judgments);
+      break;
+    default:
+      // @CS2580: add your own metric evaluations above, using function
+      // names like evaluateQueryMetric0.
+      System.err.println("Requested metric not implemented!");
     }
   }
 
@@ -199,7 +182,7 @@ class Evaluator {
   }
 
 //  Precision at 1,5 and 10
-  public static void evaluateQueryAtMetric0(
+  public static void evaluateQueryMetric0(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
 
@@ -217,7 +200,7 @@ class Evaluator {
   }
 
 //  Recall at 1, 5 and 10
-  public static void evaluateQueryAtMetric1(
+  public static void evaluateQueryMetric1(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances relevances = judgments.get(query);
@@ -235,7 +218,7 @@ class Evaluator {
   }
 
 //  F measure at 1, 5 and 10
-  public static void evaluateQueryAtMetric2(
+  public static void evaluateQueryMetric2(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances relevances = judgments.get(query);
@@ -254,7 +237,7 @@ class Evaluator {
   }
 
 //  Precision at recall values of 0.0, 0.1, ..., 1.0
-  public static void evaluateQueryAtMetric3(
+  public static void evaluateQueryMetric3(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances relevances = judgments.get(query);
@@ -278,6 +261,7 @@ class Evaluator {
     }
   }
 
+//  Returns the recall at every retrieved document position
   public static List<Double> getAllRecall(DocumentRelevances relevances, List<Double> relevantDocCumulative){
     List<Double> allRecall = new ArrayList<>();
     int totalRelevantCount = relevances.getTotalRelevantCount();
@@ -287,7 +271,7 @@ class Evaluator {
     return allRecall;
   }
 
-//  Gets a monotonously increasing array of precision values for the retrieved documents
+//  Returns a monotonously increasing array of precision values for the retrieved documents
   public static List<Double> getAllMaxPrecision(List<Double> relevantDocCumulative){
     List<Double> allMaxPrecision = new ArrayList<>();
     double maxPrecision = 0.0;
@@ -368,7 +352,8 @@ class Evaluator {
 
   }
 
-  public static void evaluateQueryAtMetric4(
+//  Computes the average precision for precision points at each relevant document retrieved
+  public static void evaluateQueryMetric4(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances relevances = judgments.get(query);
@@ -401,7 +386,8 @@ class Evaluator {
     System.out.println(query + "\t" + avgPrecision);
   }
 
-  public static void evaluateQueryAtMetric5(
+//  Computes NDCG value at 1, 5 and 10 retrieved documents
+  public static void evaluateQueryMetric5(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances scoredRelevances = judgments.get(query);
@@ -420,7 +406,8 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(getNDCGAtIndex(10, DCG, idealDCG)));
   }
 
-  public static void evaluateQueryAtMetric6(
+//  Computes the Reciprocal Rank
+  public static void evaluateQueryMetric6(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
     DocumentRelevances relevances = judgments.get(query);
