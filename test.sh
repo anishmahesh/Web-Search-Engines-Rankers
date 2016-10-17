@@ -18,11 +18,13 @@ bold='\033[1m'
 blue='\033[0;34m'
 NC='\033[0m' # No Color
 
+mkdir -p TestOutputs
+rm -r TestOutputs/* &> /dev/null
+
 
 
 echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Test Case Runner${NC}\n\n"
 
-rm -r TestOutputs/*
 
 echo "\nCompiling Java Code\n"
 {
