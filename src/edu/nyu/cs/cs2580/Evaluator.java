@@ -256,7 +256,7 @@ class Evaluator {
       }
     } catch (IndexOutOfBoundsException e) {
       System.err.println("IndexOutOfBoundsException: " + e.getMessage());
-      System.err.println("Not all relevant cases included, please add more docs to result. To do this, in your query add greater count for :&num=<count>.");
+      System.err.println("Not all relevant cases included, please add all docs to result. To do this, in your query add :&num=all.");
       System.err.println("Query Format :\n http://<host>:<port>/search?query=<query>&ranker=<ranker>&format=<format>&num=<count>");
     }
   }
