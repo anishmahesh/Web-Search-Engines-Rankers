@@ -155,7 +155,7 @@ do
     echo "\nEvaluating phrase ranker"
     {
         evaluate "$query" "phrase"
-    } >> TestOutputs/hw1.3-numviews.tsv  2>&0
+    } >> TestOutputs/hw1.3-phrase.tsv  2>&0
 done < "$filename"
 
 
