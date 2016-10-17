@@ -35,7 +35,7 @@ compile_code () {
         echo "\n\n${green}Java Build Successful${NC}\n\n"
     else
         echo "\n\n${red}Java Build Failed${NC}\n\n"
-        exit 0
+        exit 1
     fi
 }
 
@@ -50,7 +50,7 @@ run_indexer () {
         echo "\n\n${green}Search Index Created${NC}\n\n"
     else
         echo "\n\n${red}Index Creation Failed${NC}\n\n"
-        exit 0
+        exit 1
     fi
 }
 
@@ -76,7 +76,7 @@ start_server () {
         echo "\n\n${green}Server Started${NC}\n\n"
     else
         echo "\n\n${red}Initialising Server Encountered an error${NC}\n\n"
-        exit 0
+        exit 1
     fi
 }
 
@@ -184,22 +184,21 @@ shut_server () {
         echo "\n\n${green}Server Stopped${NC}\n\n"
     else
         echo "\n\n${red}Error in shutting down the server${NC}\n\n"
-        exit 0
+        exit 1
     fi
     rm java_pid
 }
 
 
 usage () {
-    echo "\n\nUsage: `basename $0` \n-- This is a utility script for server commands and test execution\n\nCommands: [-r] [-t] [-s] [--run] [--stop] [--test]\n\nwhere:\n-r\tcompiles code, sets up index and runs the java server\n-t\tcompiles code, starts server, indexes and executes test cases\n-s\tstops the java server\n\n"
+    echo "\n\nUsage: `basename $0` \n-- This is a utility script for server commands and test execution\n\nCommands: [-r] [-t] [-s] [--run] [--stop] [--test]\n\nwhere:\n-r\tcompiles code, sets up index and runs the java server\n-t\tcompiles code, starts server, indexes and generates the output cases\n-s\tstops the java server\n\n"
 }
 
 
-if ["$1" -eq ""]; then
+if [ "$1" == "" ]; then
     usage
     exit 1
 fi
-
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -210,11 +209,11 @@ while [ "$1" != "" ]; do
                         start_server
                         ;;
         -s | --stop )
-                        echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Stop processer${NC}\n\n"
+                        echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Stop Processor${NC}\n\n"
                         shut_server
                         ;;
         -t | --test )
-                        echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Server Runner${NC}\n\n"
+                        echo "\n\n${bold}${yellow}CSGA-2580 - Group 8 - Test Output Files Generator${NC}\n\n"
                         compile_code
                         run_indexer
                         start_server
@@ -234,10 +233,5 @@ while [ "$1" != "" ]; do
     shift
 done
 
-
-
-
-
-
-
+exit 0
 
