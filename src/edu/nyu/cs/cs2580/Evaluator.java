@@ -135,7 +135,7 @@ class Evaluator {
             break;
           case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
             break;
-          case 5: evaluateQueryAtMetric6(currentQuery, results, judgments);
+          case 5: evaluateQueryAtMetric5(currentQuery, results, judgments);
             break;
           case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
             break;
@@ -167,7 +167,7 @@ class Evaluator {
           break;
         case 4: evaluateQueryAtMetric4(currentQuery, results, judgments);
           break;
-        case 5: evaluateQueryAtMetric6(currentQuery, results, judgments);
+        case 5: evaluateQueryAtMetric5(currentQuery, results, judgments);
           break;
         case 6: evaluateQueryAtMetric6(currentQuery, results, judgments);
           break;
