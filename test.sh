@@ -91,7 +91,7 @@ evaluate () {
     printf "$q\t"
     q="${q// /+}"
     n=10
-    for ((i=0; i <= 6 ; i++))
+    for i in $(seq 0 6)
     do
         if [[ ! -z $r ]]
         then
