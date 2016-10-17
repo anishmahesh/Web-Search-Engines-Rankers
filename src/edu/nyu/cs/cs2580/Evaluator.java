@@ -198,6 +198,7 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(R / N));
   }
 
+//  Precision at 1,5 and 10
   public static void evaluateQueryAtMetric0(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
@@ -215,7 +216,7 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(getPrecisionAtIndex(10, relevantDocCumulative)));
   }
 
-
+//  Recall at 1, 5 and 10
   public static void evaluateQueryAtMetric1(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
@@ -233,6 +234,7 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(getRecallAtIndex(10, totalRelevantCount, relevantDocCumulative)));
   }
 
+//  F measure at 1, 5 and 10
   public static void evaluateQueryAtMetric2(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
@@ -251,6 +253,7 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(getFMeasureAtIndex(10, beta, totalRelevantCount, relevantDocCumulative)));
   }
 
+//  Precision at recall values of 0.0, 0.1, ..., 1.0
   public static void evaluateQueryAtMetric3(
           String query, List<Integer> docids,
           Map<String, DocumentRelevances> judgments) {
@@ -262,13 +265,11 @@ class Evaluator {
 
     List<Double> relevantDocCumulative = getTotalRelevantDocCumulative(relevances, docids);
     List<Double> allRecall = getAllRecall (relevances, relevantDocCumulative);
-    List<Double> allMaxPrecision = getAllMaxPrecision (relevances, relevantDocCumulative);
+    List<Double> allMaxPrecision = getAllMaxPrecision (relevantDocCumulative);
     try {
       Double[] Precisions = getPrecisionForRecallRange(allRecall, allMaxPrecision);
-      double count = 0.0;
       for(int i=0; i<=10;i++){
-        count = i * 1.0;
-        System.out.println(query + "\t" + Precisions[i] + " at " + count/10);
+        System.out.println(query + "\t" + Precisions[i] + " at " + (double)i/10);
       }
     } catch (IndexOutOfBoundsException e) {
       System.err.println("IndexOutOfBoundsException: " + e.getMessage());
@@ -286,10 +287,11 @@ class Evaluator {
     return allRecall;
   }
 
-  public static List<Double> getAllMaxPrecision(DocumentRelevances relevances, List<Double> relevantDocCumulative){
+//  Gets a monotonously increasing array of precision values for the retrieved documents
+  public static List<Double> getAllMaxPrecision(List<Double> relevantDocCumulative){
     List<Double> allMaxPrecision = new ArrayList<>();
     double maxPrecision = 0.0;
-    double precision = 0.0;
+    double precision;
     for(int i=relevantDocCumulative.size(); i>0; i--){
       precision = getPrecisionAtIndex(i,relevantDocCumulative);
       if(precision > maxPrecision){
@@ -300,6 +302,7 @@ class Evaluator {
     return allMaxPrecision;
   }
 
+//  Sets the precision at each standard recall value to the max precision observed for a higher recall level
   public static Double[] getPrecisionForRecallRange(List<Double> allRecall, List<Double> allPrecision){
     double previousPrecision = 1.0;
     Double[] Precision = new Double[11];
@@ -353,7 +356,10 @@ class Evaluator {
       if (Precision[0] == -1) {
         Precision[0] = previousPrecision;
       }
-      for (int i = 10; i >= 0; i--) {
+      if (Precision[10] == -1) {
+        Precision[10] = 0.0;
+      }
+      for (int i = 9; i >= 0; i--) {
         if (Precision[i] == -1.0) {
           Precision[i] = Precision[i + 1];
         }
@@ -384,7 +390,15 @@ class Evaluator {
 
     }
 
-    System.out.println(query + "\t" + precisionSum / relevantDocCumulative.get(relevantDocCumulative.size() - 1));
+    double avgPrecision;
+    Double numOfRelevantRetrieved = relevantDocCumulative.get(relevantDocCumulative.size() - 1);
+    if (numOfRelevantRetrieved == 0) {
+      avgPrecision = 0;
+    }
+    else {
+      avgPrecision = precisionSum / numOfRelevantRetrieved;
+    }
+    System.out.println(query + "\t" + avgPrecision);
   }
 
   public static void evaluateQueryAtMetric5(
@@ -424,7 +438,13 @@ class Evaluator {
       }
     }
 
-    System.out.println(query + "\t" +  (1.0 / (i+1)));
+    double rr;
+    if (i == relevantDocCumulative.size()) {
+      rr = 0;
+    }
+    else rr = (1.0 / (i+1));
+
+    System.out.println(query + "\t" + rr);
   }
 
   public static double getFMeasureAtIndex(int index, double beta, int totalRelevantCount, List<Double> relevantDocCumulative) {
@@ -432,33 +452,39 @@ class Evaluator {
     double precision = getPrecisionAtIndex(index, relevantDocCumulative);
     double recall = getRecallAtIndex(index, totalRelevantCount, relevantDocCumulative);
 
+    if (precision == 0 && recall == 0) return 0;
     return (1 + Math.pow(beta, 2))*(precision*recall)/((Math.pow(beta, 2) * precision) + recall);
   }
 
 
+//  Gets the precision at an index by dividing the cumulative relevant count till that index by the index
   public static double getPrecisionAtIndex(int index, List<Double> relevantDocCumulative) {
 
     return relevantDocCumulative.get(index-1) / index;
 
   }
 
+//  Gets the recall at an index by dividing the cumulative relevant count till that index
+//  by the total relevant docs in the collection
   public static double getRecallAtIndex(int index, int totalRelevantCount, List<Double> relevantDocCumulative) {
+    if (totalRelevantCount == 0) return 0;
     return relevantDocCumulative.get(index-1) / totalRelevantCount;
   }
 
   public static double getNDCGAtIndex(int index, List<Double> DCG, List<Double> IdealDCG){
     double DCGval = 0.0;
     double IdealDCGval =  1.0;
-    if(DCG.size() > index-1 && IdealDCG.size() > index-1){
+    if(DCG.size() > index-1 && IdealDCG.size() > index-1 && IdealDCG.get(index-1) != 0){
       DCGval = DCG.get(index-1);
       IdealDCGval = IdealDCG.get(index-1);
-    } else if(DCG.size()>0 && IdealDCG.size() > 0){
+    } else if(DCG.size()>0 && IdealDCG.size() > 0 && IdealDCG.get(DCG.size()-1) != 0){
       DCGval = DCG.get(DCG.size()-1);
       IdealDCGval = IdealDCG.get(DCG.size()-1);
     }
     return DCGval/IdealDCGval;
   }
 
+//  Gets the cumulative count of relevant documents at each index of the retrieved docs
   public static List<Double> getRelevantDocCumulative(DocumentRelevances relevances, List<Integer> docids) {
 
     List<Double> cumulativeCount = new ArrayList<>();
